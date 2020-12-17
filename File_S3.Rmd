@@ -101,14 +101,21 @@ library(Rmisc)
 #install.packages("dplyr")
 library(dplyr) #A grammar of data manipulation. A fast, consistent tool for working with data frame like objects. help(package="dplyr")
 #install.packages("gridExtra")
+library(amap) #Calculating spearman correlations
 ```
 
 ## Read in data
 ```{r}
-Tax <- read.delim(file="TaxonomyRaw20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
-Metadata <- read.delim(file="Metadata20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
-Feature <- read.delim(file="FeatureShort20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
+Tax <- read.delim(file="../File_S2/TaxonomyRaw20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
+Metadata <- read.delim(file="../File_S2/Metadata20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
+Feature <- read.delim(file="../File_S2/FeatureShort20180925.txt", check.names=FALSE, stringsAsFactors=FALSE, strip.white=TRUE)
 ```
+
+## Change naming
+```{r}
+colnames(Metadata)[14] <- "Storage"
+```
+
 
 ## Analysis
 Chunks can be run by themselves or consecutively
@@ -413,7 +420,7 @@ Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 
 Y <- Metadata2$Sample_LPSX
 
-PCACoDa = mixOmics::pca(t(Tax2), ncomp = 10, logratio = 'ILR')#Can change CLR and ILR
+PCACoDa = mixOmics::pca(t(Tax2), ncomp = 10, logratio = 'CLR')#Can change CLR and ILR
 #plot(PCACoDa)
 
 #plotIndiv(PCACoDa, 
@@ -439,13 +446,13 @@ PCAMeta<-data.frame(Sample=PCACoDa$names$sample, PCA1=PCACoDa$variates$X[,1], PC
 Metadata2<-merge(Metadata2, PCAMeta, by="Sample")
 #Creating column in metadata for plotting with lines between replicates
 Metadata2$Sample_name_norep<-gsub("*_a|*_b|*_c", "", Metadata2$Sample_name)
-#Change temperature and time to characters for plotting
-Metadata2$Temperature<-as.character(Metadata2$Temperature)
+#Change Storage and time to characters for plotting
+Metadata2$Storage<-as.character(Metadata2$Storage)
 Metadata2$Time<-as.character(Metadata2$Time)
-#Change NAs in temperature to Direct
-Metadata2$Temperature[is.na(Metadata2$Temperature)]<-"Direct"
+#Change NAs in Storage to Direct
+Metadata2$Storage[is.na(Metadata2$Storage)]<-"Direct"
 #Change order for coloring
-Metadata2$Temperature<-ordered(Metadata2$Temperature, levels=c("Direct", "-80", "-20", "5", "22"))
+Metadata2$Storage<-ordered(Metadata2$Storage, levels=c("Direct", "-80", "-20", "5", "22"))
 
 #Create plot name
 pltName <- paste( 'PCA', i, sep = '' )
@@ -478,13 +485,13 @@ dev.off()
 
 #Extract legend 
 #legend<-ggplot(Metadata2) + 
-#  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Temperature), size=1.5) +
+#  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Storage), size=1.5) +
 #  #geom_line(aes(x=PCA1, y=PCA2, group=Replicate_Boxplot)) + 
 #  geom_line(aes(x=PCA1, y=PCA2, group=Matching_samples), size=0.1, linetype="dotted") +
 #  scale_color_manual(values=c("#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#e41a1c")) +
 #  scale_shape_manual(values=c(8,18,15,16,17,0,1,2)) +
 #  ggtitle(paste("PCA", i, sep=" ")) + 
-#  labs(colour="Temperature / ?C", shape="Processing", x = eig_1, y = eig_2) + 
+#  labs(colour="Storage / ?C", shape="Processing", x = eig_1, y = eig_2) + 
 #  theme_bw() + 
 #  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title=element_text(size=12))
 #legendplot<-get_legend(legend)
@@ -658,7 +665,7 @@ Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 
 Y <- Metadata2$Sample_LPSX
 
-PCACoDa = mixOmics::pca(t(Tax2), ncomp = 10, logratio = 'ILR')#Can change CLR and ILR
+PCACoDa = mixOmics::pca(t(Tax2), ncomp = 10, logratio = 'CLR')#Can change CLR and ILR
 #plot(PCACoDa)
 
 #plotIndiv(PCACoDa, 
@@ -684,25 +691,25 @@ PCAMeta<-data.frame(Sample=PCACoDa$names$sample, PCA1=PCACoDa$variates$X[,1], PC
 Metadata2<-merge(Metadata2, PCAMeta, by="Sample")
 #Creating column in metadata for plotting with lines between replicates
 Metadata2$Sample_name_norep<-gsub("*_a|*_b|*_c", "", Metadata2$Sample_name)
-#Change temperature and time to characters for plotting
-Metadata2$Temperature<-as.character(Metadata2$Temperature)
+#Change Storage and time to characters for plotting
+Metadata2$Storage<-as.character(Metadata2$Storage)
 Metadata2$Time<-as.character(Metadata2$Time)
-#Change NAs in temperature to Direct
-Metadata2$Temperature[is.na(Metadata2$Temperature)]<-"Direct"
+#Change NAs in Storage to Direct
+Metadata2$Storage[is.na(Metadata2$Storage)]<-"Direct"
 #Change order for coloring
-Metadata2$Temperature<-ordered(Metadata2$Temperature, levels=c("Direct", "-80", "-20", "5", "22"))
+Metadata2$Storage<-ordered(Metadata2$Storage, levels=c("Direct", "-80", "-20", "5", "22"))
 
 #Create plot name
 pltName <- paste( 'PCA', i, sep = '' )
 #create PCA
 PCAList[[ pltName ]] <- ggplot(Metadata2) + 
-  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Temperature), size=5) +
+  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Storage), size=5) +
   #geom_line(aes(x=PCA1, y=PCA2, group=Replicate_Boxplot)) + 
   geom_line(aes(x=PCA1, y=PCA2, group=Matching_samples), size=0.1, linetype="dotted") +
   scale_color_manual(values=c("#984ea3", "#4daf4a", "#377eb8", "#ff7f00", "#993300")) +
   scale_shape_manual(values=c(8,18,15,16,17,0,1,2)) +
   ggtitle(paste("PCA", i, sep=" ")) + 
-  labs(colour="Processing", shape="Temperature (?C)", x = eig_1, y = eig_2) + 
+  labs(colour="Processing", shape="Storage (?C)", x = eig_1, y = eig_2) + 
   theme_bw() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title=element_text(size=12), legend.position="none")
 }
@@ -737,13 +744,13 @@ dev.off()
 
 #Extract legend 
 #legend<-ggplot(Metadata2) + 
-#  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Temperature), size=1.5) +
+#  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Storage), size=1.5) +
 #  #geom_line(aes(x=PCA1, y=PCA2, group=Replicate_Boxplot)) + 
 #  geom_line(aes(x=PCA1, y=PCA2, group=Matching_samples), size=0.1, linetype="dotted") +
 #  scale_color_manual(values=c("#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#e41a1c")) +
 #  scale_shape_manual(values=c(8,18,15,16,17,0,1,2)) +
 #  ggtitle(paste("PCA", i, sep=" ")) + 
-#  labs(colour="Temperature / ?C", shape="Processing", x = eig_1, y = eig_2) + 
+#  labs(colour="Storage / ?C", shape="Processing", x = eig_1, y = eig_2) + 
 #  theme_bw() + 
 #  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title=element_text(size=12))
 #legendplot<-get_legend(legend)
@@ -755,13 +762,13 @@ dev.off()
 #dev.off()
 
 legend2<-ggplot(Metadata2) + 
-  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Temperature), size=5) +
+  geom_point(aes(PCA1, PCA2, color = Sample_LPSX, group = Sample, shape = Storage), size=5) +
   #geom_line(aes(x=PCA1, y=PCA2, group=Replicate_Boxplot)) + 
   geom_line(aes(x=PCA1, y=PCA2, group=Matching_samples), size=0.1, linetype="dotted") +
   scale_color_manual(values=c("#984ea3", "#4daf4a", "#377eb8", "#ff7f00", "#993300")) +
   scale_shape_manual(values=c(8,18,15,16,17,0,1,2)) +
   ggtitle(paste("PCA", i, sep=" ")) + 
-  labs(colour="Processing", shape="Temperature / ?C", x = eig_1, y = eig_2) + 
+  labs(colour="Processing", shape="Storage / ?C", x = eig_1, y = eig_2) + 
   theme_bw() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.title=element_text(size=12), legend.position="bottom")
 legendplot<-get_legend(legend2)
@@ -789,16 +796,13 @@ SubExp<-"LPSX" #HX, FTX, LTX, LPSX, HXFTX, HXLTX, HXLPSX, HXLTXLPSX, HXFTXLTX, A
 #Subset Frozen Unfrozen
 SubFre<-"Both" #Frozen, Unfrozen, Both
 
-#The organisms clustering
-OrgCluster<-"correlation" #correlation, euclidean, maximum, manhattan, canberra, binary, minkowski 
-
 #How many organisms to include in heatmap
 Orgs<-30 #Write a number 30-50 seems appropiate for readability
 
-HeatmapExplainers<-c("Sequencing_platform", "Library_preparation", "Temperature","Experiment")
+HeatmapExplainers<-c("Sequencing_platform", "Library_preparation", "Storage","Experiment")
 
 #Make list of annotation colors
-annotation_colorsNew = list(Diagosis = c(Handling_experiment = "blue"), Experiment = c(Pig_feces_1 = "#30241E", Pig_feces_2 = "#B59B80", Sewage_1 = "#33a02c", Sewage_2 = "#B2DF8A"), SpikedUnspiked = c(Spiked = "Black", Unspiked = "White"), Time = c("0" = "#FFFFFF", "16" = "#CCCCCC", "64" = "#666666"), Temperature = c(Direct = "#999999", "-80" = "#0571b0", "-20" = "#92c5de", "5" = "#f4a582", "22" = "#ca0020"), Sequencing_platform = c(Hiseq = "Black", Nextseq = "White"), Library_preparation = c(Kappa = "#984ea3", Nextera = "#ff7f00", Nextflex = "#e41a1c"))
+annotation_colorsNew = list(Diagosis = c(Handling_experiment = "blue"), Experiment = c(Pig_feces_1 = "#30241E", Pig_feces_2 = "#B59B80", Sewage_1 = "#33a02c", Sewage_2 = "#B2DF8A"), SpikedUnspiked = c(Spiked = "Black", Unspiked = "White"), Time = c("0" = "#FFFFFF", "16" = "#CCCCCC", "64" = "#666666"), Storage = c(Direct = "#999999", "-80" = "#0571b0", "-20" = "#92c5de", "5" = "#f4a582", "22" = "#ca0020"), Sequencing_platform = c(Hiseq = "Black", Nextseq = "White"), Library_preparation = c(Kappa = "#984ea3", Nextera = "#ff7f00", Nextflex = "#e41a1c"))
 
 #make empty list for plots
 HeatList=list()
@@ -912,8 +916,24 @@ TaxHeatmap <- Tax2[order(rowSums(TaxHeatmap), decreasing = T),]
 #Impose a maximum number of plotted Species
 TaxHeatmap <- TaxHeatmap[1:min(c(nrow(TaxHeatmap), Orgs)),]
 
+##Remove Unknown from plot
+TaxHeatmap <- TaxHeatmap[row.names(TaxHeatmap) != "Unknown",]
+
+#The organisms clustering
+OrgCluster<-amap::Dist(TaxHeatmap, method="spearman") 
+
+#filtering of the Counttable depending on rowSums. 
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>0,] #Removing all rows that only contains zeroes
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>(5*ncol(TaxHeatmap)),] #Removing all rows(Species)  that is below an average count of 5.
+## replace 0 values with an estimate using simple multiplicative replacement
+#TaxHeatmap <- t(cmultRepl(t(TaxHeatmap), method="CZM", label=0)) #No zeroes
+#Maks TSS
+TaxHeatmap<-sweep(TaxHeatmap, 2, colSums(TaxHeatmap), FUN="/")
+
+rn <- row.names(TaxHeatmap)
+
 ##Then I standardized the orgs into zero mean and unit variance
-TaxHeatmap <- data.frame(t(decostand(t(TaxHeatmap), method="standardize"))) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
+TaxHeatmap <- data.frame(t(decostand(clr(t(TaxHeatmap)), method="standardize")), row.names = rn) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
 
 ##This is what I did previously. Now I changed it to do a Hellinger transformation, which is total sum scaling and then square rooting each entry. Doing it on total sum scaled data since then it is also normalized according to genome size so in reality I'm doing total sum scaling twice. Moved to the top to do it before subsetting.   
 #Log transform OTU table with higher base pick one. 
@@ -924,10 +944,10 @@ TaxHeatmap <- data.frame(t(decostand(t(TaxHeatmap), method="standardize"))) #Can
 
 #Make dataframe with Metadata2 for heatmap annotation
 colannodf <- data.frame(Metadata2[, HeatmapExplainers], row.names = Metadata2$Sample)
-#Depending on if time and temperature are part of the plots make them into characters 
+#Depending on if time and Storage are part of the plots make them into characters 
 #colannodf$Time <- as.character(colannodf$Time)
-colannodf$Temperature <- as.character(colannodf$Temperature)
-colannodf$Temperature[is.na(colannodf$Temperature)] <- "Direct" #Change NA to Direct
+colannodf$Storage <- as.character(colannodf$Storage)
+colannodf$Storage[is.na(colannodf$Storage)] <- "Direct" #Change NA to Direct
 
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
@@ -940,7 +960,9 @@ Tax2 <- t(cmultRepl(t(Tax2), method="CZM", label=0))
 Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
-distmatrix_Species <- vegdist(ilr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
+distmatrix_Species <- vegdist(clr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
+
+
 
 #Draw the heatmap
 plot<-pheatmap(TaxHeatmap, 
@@ -1078,16 +1100,32 @@ TaxHeatmap <- Tax2[order(rowSums(TaxHeatmap), decreasing = T),]
 #Impose a maximum number of plotted Species
 TaxHeatmap <- TaxHeatmap[1:min(c(nrow(TaxHeatmap), Orgs)),]
 
+##Remove Unknown from plot
+TaxHeatmap <- TaxHeatmap[row.names(TaxHeatmap) != "Unknown",]
+
+#The organisms clustering
+OrgCluster<-amap::Dist(TaxHeatmap, method="spearman") 
+
+#filtering of the Counttable depending on rowSums. 
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>0,] #Removing all rows that only contains zeroes
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>(5*ncol(TaxHeatmap)),] #Removing all rows(Species)  that is below an average count of 5.
+## replace 0 values with an estimate using simple multiplicative replacement
+#TaxHeatmap <- t(cmultRepl(t(TaxHeatmap), method="CZM", label=0)) #No zeroes
+#Maks TSS
+TaxHeatmap<-sweep(TaxHeatmap, 2, colSums(TaxHeatmap), FUN="/")
+
+rn <- row.names(TaxHeatmap)
+
 ##Then I standardized the orgs into zero mean and unit variance
-TaxHeatmap <- data.frame(t(decostand(t(TaxHeatmap), method="standardize"))) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
+TaxHeatmap <- data.frame(t(decostand(clr(t(TaxHeatmap)), method="standardize")), row.names = rn) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
 
 
 #Make dataframe with Metadata2 for heatmap annotation
 colannodf <- data.frame(Metadata2[, HeatmapExplainers], row.names = Metadata2$Sample)
-#Depending on if time and temperature are part of the plots make them into characters 
+#Depending on if time and Storage are part of the plots make them into characters 
 #colannodf$Time <- as.character(colannodf$Time)
-colannodf$Temperature <- as.character(colannodf$Temperature)
-colannodf$Temperature[is.na(colannodf$Temperature)] <- "Direct" #Change NA to Direct
+colannodf$Storage <- as.character(colannodf$Storage)
+colannodf$Storage[is.na(colannodf$Storage)] <- "Direct" #Change NA to Direct
 
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
@@ -1100,7 +1138,7 @@ Tax2 <- t(cmultRepl(t(Tax2), method="CZM", label=0))
 Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
-distmatrix_Species <- vegdist(ilr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
+distmatrix_Species <- vegdist(clr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
 
 #Draw the heatmap
 plot<-pheatmap(TaxHeatmap, 
@@ -1250,16 +1288,32 @@ TaxHeatmap <- Tax2[order(rowSums(TaxHeatmap), decreasing = T),]
 #Impose a maximum number of plotted Species
 TaxHeatmap <- TaxHeatmap[1:min(c(nrow(TaxHeatmap), Orgs)),]
 
+##Remove Unknown from plot
+TaxHeatmap <- TaxHeatmap[row.names(TaxHeatmap) != "Unknown",]
+
+#The organisms clustering
+OrgCluster<-amap::Dist(TaxHeatmap, method="spearman") 
+
+#filtering of the Counttable depending on rowSums. 
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>0,] #Removing all rows that only contains zeroes
+TaxHeatmap <- TaxHeatmap[rowSums(TaxHeatmap)>(5*ncol(TaxHeatmap)),] #Removing all rows(Species)  that is below an average count of 5.
+## replace 0 values with an estimate using simple multiplicative replacement
+TaxHeatmap <- t(cmultRepl(t(TaxHeatmap), method="CZM", label=0))
+#Maks TSS
+TaxHeatmap<-sweep(TaxHeatmap, 2, colSums(TaxHeatmap), FUN="/")
+
+rn <- row.names(TaxHeatmap)
+
 ##Then I standardized the orgs into zero mean and unit variance
-TaxHeatmap <- data.frame(t(decostand(t(TaxHeatmap), method="standardize"))) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
+TaxHeatmap2 <- data.frame(t(decostand(clr(t(TaxHeatmap)), method="standardize")), row.names = rn) #Can also use scale in pheatmap, but not exactly sure what scaling that is being performed
 
 
 #Make dataframe with Metadata2 for heatmap annotation
 colannodf <- data.frame(Metadata2[, HeatmapExplainers], row.names = Metadata2$Sample)
-#Depending on if time and temperature are part of the plots make them into characters 
+#Depending on if time and Storage are part of the plots make them into characters 
 #colannodf$Time <- as.character(colannodf$Time)
-colannodf$Temperature <- as.character(colannodf$Temperature)
-colannodf$Temperature[is.na(colannodf$Temperature)] <- "Direct" #Change NA to Direct
+colannodf$Storage <- as.character(colannodf$Storage)
+colannodf$Storage[is.na(colannodf$Storage)] <- "Direct" #Change NA to Direct
 
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
@@ -1272,7 +1326,7 @@ Tax2 <- t(cmultRepl(t(Tax2), method="CZM", label=0))
 Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
-distmatrix_Species <- vegdist(ilr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
+distmatrix_Species <- vegdist(clr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
 
 #Draw the heatmap
 plot<-pheatmap(TaxHeatmap, 
@@ -1425,7 +1479,7 @@ Tax2 <- t(cmultRepl(t(Tax2), method="CZM", label=0))
 Tax2<-sweep(Tax2, 2, colSums(Tax2), FUN="/")
 #Calculate sample-distance matrix 
 #Note, that this is done on the full set, not just the shown. Makes sense eventhough not show in heatmap they can be in the clustering calculations, this also means samples can look more similar in the heatmap but not cluster as closely. Also calculates on the not log transformed data.
-distmatrix <- vegdist(ilr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
+distmatrix <- vegdist(clr(t(Tax2)), method="euclidean") #Previously vegdist(decostand(t(Tax2), method="hellinger"), method="bray")
 
 #Make distances into matrix
 distmatrix<-as.matrix(distmatrix)
@@ -1971,7 +2025,7 @@ boxplotting<-bind_rows(P1vsP2, S1vsS2, P1vsP1, P2vsP2, S1vsS1, S2vsS2, NX1vsNX2,
 
 #Create boxplot
 #Defining the order, can change if needed
-boxplotting$Comparison<-factor(boxplotting$Comparison, levels= c("NXNSRep", "DNAExRep", "NFHSvsNS", "NFvsKAHI", "NFvsNXNS", "LPS", "Storage", "P1vsP1", "P2vsP2", "P1vsP2", "S1vsS1", "S2vsS2", "S1vsS2"))
+boxplotting$Comparison<-factor(boxplotting$Comparison, levels= c("P1vsP1", "P2vsP2", "P1vsP2", "S1vsS1", "S2vsS2", "S1vsS2", "DNAExRep","NXNSRep", "LPS", "Storage", "NFHSvsNS", "NFvsKAHI", "NFvsNXNS"))
 boxplotting$jitter<-factor(boxplotting$jitter, levels= c("P1vsP2", "S1vsS2", "P1", "P2", "S1", "S2"))
 
 #pdf(paste("LPSXSFig2BoxplotPWD", ".pdf", sep=""), height=6, width=12)
@@ -1983,7 +2037,7 @@ ggplot(boxplotting, aes(x=Comparison, y=value)) +
 #dev.off()
 
 #Trying to make fancy boxplots + geom_jitter(), might want to 
-jitter=c(PFvsSW = "Black", P1vsP2 = "Black", S1vsS2 = "Black", P1 = "#30241E", P2 = "#B59B80", S1 = "#33a02c", S2 = "#B2DF8A")
+jitter=c(PFvsSW = "Darkblue", P1vsP2 = "Darkblue", S1vsS2 = "Darkblue", P1 = "#30241E", P2 = "#B59B80", S1 = "#33a02c", S2 = "#B2DF8A")
 pdf(paste("Fig1_BoxplotsPWD", ".pdf", sep=""), height=6, width=12) #PWD = Pairwise distances
 ggplot(boxplotting, aes(x=Comparison, y=value)) + 
   geom_boxplot() + 
@@ -2416,7 +2470,7 @@ Tax2<-as.matrix(t(sweep(Tax2, 2, colSums(Tax2), FUN="/"))) #Transpose to have ge
 Metadata2$LPSP<-paste(Metadata2$Library_preparation, Metadata2$Sequencing_platform, sep="_") #Be aware that Nextera 1 & 2 are analyzed as one group, you could argue that it should be done seperately
 
 #Calculate sample-distance matrix 
-distmatrix <- vegdist(ilr(Tax2), method="euclidean") 
+distmatrix <- vegdist(clr(Tax2), method="euclidean") 
 
 #Which factor to test can pick Metadata2 columns consider including both library preparation and sequencing platform individually in the model
 Test_Factor <- "LPSP" #LPSP, Library_preparation, Sequencing_platform
